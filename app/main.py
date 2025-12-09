@@ -5,19 +5,34 @@ from typing import Any, List
 class Animal:
     alive: List["Animal"] = []
 
-    def __init__(self, name: str, health: int = 100,
-                 hidden: bool = False) -> None:
+    def __init__(
+        self,
+        name: str,
+        health: int = 100,
+        hidden: bool = False,
+    ) -> None:
         self.name = name
         self.health = health
         self.hidden = hidden
+
+        # Add to alive list first
         Animal.alive.append(self)
 
-    def __setattr__(self, key: str, value: Any) -> None:
+        # If created dead → remove immediately
+        if self.health <= 0:
+            self.die()
+
+    def __setattr__(
+        self,
+        key: str,
+        value: Any,
+    ) -> None:
         if key == "health" and hasattr(self, "health"):
             super().__setattr__(key, value)
             if value <= 0:
                 self.die()
             return
+
         super().__setattr__(key, value)
 
     def die(self) -> None:
@@ -41,9 +56,13 @@ class Herbivore(Animal):
 
 
 class Carnivore(Animal):
-    def bite(self, target: Animal) -> None:
+    def bite(
+        self,
+        target: Animal,
+    ) -> None:
         if not isinstance(target, Herbivore):
             return
         if target.hidden:
             return
+
         target.health -= 50
